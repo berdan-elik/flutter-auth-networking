@@ -48,6 +48,7 @@ lib/screens/                     login and profile screens
 server/bin/server.dart           fake backend (shelf)
 test/auth_flow_test.dart         the behaviour described below
 test/fake_token_storage.dart     in-memory storage for the tests
+test/token_storage_test.dart     reading stored tokens, including corrupt data
 ```
 
 ## Design notes
@@ -101,6 +102,7 @@ flutter test
 - a late 401 reuses the new token
 - a network failure during refresh keeps the session
 - signing out while a refresh is running leaves no tokens on the device
+- corrupt stored tokens are dropped and the session starts signed out
 
 ## Not done
 

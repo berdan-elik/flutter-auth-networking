@@ -29,7 +29,12 @@ class SecureTokenStorage implements TokenStorage {
     if (!_loaded) {
       final raw = await _storage.read(key: _key);
       if (raw != null) {
-        _cached = AuthTokens.fromJson(jsonDecode(raw) as Map<String, Object?>);
+        _cached = _decode(raw);
+        if (_cached == null) {
+          // Unreadable data cannot become readable later. Dropping it lets
+          // the app start signed out instead of failing on every launch.
+          await _storage.delete(key: _key);
+        }
       }
       _loaded = true;
     }
@@ -51,5 +56,20 @@ class SecureTokenStorage implements TokenStorage {
     await _storage.delete(key: _key);
     _cached = null;
     _loaded = true;
+  }
+
+  AuthTokens? _decode(String raw) {
+    try {
+      final json = jsonDecode(raw);
+      if (json case {
+        'accessToken': final String accessToken,
+        'refreshToken': final String refreshToken,
+      }) {
+        return AuthTokens(accessToken: accessToken, refreshToken: refreshToken);
+      }
+    } on FormatException {
+      // Not JSON at all.
+    }
+    return null;
   }
 }
