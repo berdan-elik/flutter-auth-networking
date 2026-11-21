@@ -49,8 +49,12 @@ test/auth_flow_test.dart         the behaviour described below
 
 **The race.** The server rotates refresh tokens: each one works once. If two
 requests get a 401 and each starts its own refresh, the first spends the
-token and the second is rejected. From the server's side that looks like a
-stolen token, and the user is signed out for no reason.
+token and the second gets a 401. The client treats a rejected refresh as the
+end of the session, so the user is signed out for no reason.
+
+The fake server in this repo stops at that 401. A server with reuse detection
+would also treat the second attempt as a stolen token and revoke the user's
+other sessions.
 
 **A shared `Future` instead of a lock.** `TokenRefresher` keeps the `Future`
 of the refresh that is running and hands the same one to every caller. All of
