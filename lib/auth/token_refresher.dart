@@ -44,6 +44,11 @@ class TokenRefresher {
         data: {'refreshToken': current.refreshToken},
       );
       final tokens = AuthTokens.fromJson(response.data!);
+      if (await _storage.read() == null) {
+        // Signed out while the refresh was running. Writing the new pair
+        // would bring the session back on the next start.
+        throw const SessionExpiredException();
+      }
       await _storage.write(tokens);
       return tokens;
     } on DioException catch (e) {

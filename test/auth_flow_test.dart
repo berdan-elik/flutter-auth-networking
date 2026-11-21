@@ -241,4 +241,25 @@ void main() {
     expect(storage.tokens?.refreshToken, oldTokens.refreshToken);
     expect(session(), SessionState.signedIn);
   });
+
+  test('signing out during a refresh leaves no tokens behind', () async {
+    final refresh = HeldReply();
+    plainServer.onPost(
+      '/auth/refresh',
+      (server) => server.replyCallbackAsync(
+        200,
+        (_) => refresh.send(newTokens.toJson()),
+      ),
+      data: {'refreshToken': oldTokens.refreshToken},
+    );
+
+    final response = getProfile();
+    await refresh.received;
+    await container.read(sessionControllerProvider.notifier).signOut();
+    refresh.release();
+
+    await expectLater(response, throwsA(isUnauthorized));
+    expect(storage.tokens, isNull);
+    expect(session(), SessionState.signedOut);
+  });
 }

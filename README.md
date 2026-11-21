@@ -100,6 +100,7 @@ flutter test
 - a retried request that gets a 401 again is not refreshed a second time
 - a late 401 reuses the new token
 - a network failure during refresh keeps the session
+- signing out while a refresh is running leaves no tokens on the device
 
 ## Not done
 
@@ -108,8 +109,6 @@ flutter test
 - Server-side logout. Signing out deletes the tokens on the device.
 - Retrying requests whose body is a stream (file uploads); the body cannot be
   sent twice.
-- If the user signs out while a refresh is in the air, the new tokens are
-  still written to storage.
 - The iOS build. The example app was run on an Android emulator only.
 - Built with Flutter 3.44. From 3.47 on, the analyzer reports
   `package:flutter/material.dart` as deprecated in favour of `material_ui`.
