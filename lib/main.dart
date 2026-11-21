@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(const MainApp());
+import 'auth/session_controller.dart';
+import 'router.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final container = ProviderContainer();
+  await container.read(sessionControllerProvider.notifier).restore();
+
+  runApp(UncontrolledProviderScope(container: container, child: const App()));
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class App extends ConsumerWidget {
+  const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
+      title: 'Auth networking',
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }
