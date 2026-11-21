@@ -35,14 +35,19 @@ app talks to `10.0.2.2:8080` on Android and `127.0.0.1:8080` on iOS; pass
 ## Layout
 
 ```
+lib/main.dart                    restores the session, then starts the app
+lib/router.dart                  go_router redirect driven by the session
+lib/auth/auth_tokens.dart        access and refresh token pair
 lib/auth/token_storage.dart      storage interface, secure storage behind it
 lib/auth/token_refresher.dart    single-flight refresh
 lib/auth/auth_interceptor.dart   adds the header, refreshes and retries on 401
+lib/auth/auth_providers.dart     storage and plain Dio providers, base URL
 lib/auth/session_controller.dart signedOut / signedIn / expired
 lib/api/api_client.dart          wires the pieces into the Dio the app uses
-lib/router.dart                  go_router redirect driven by the session
+lib/screens/                     login and profile screens
 server/bin/server.dart           fake backend (shelf)
 test/auth_flow_test.dart         the behaviour described below
+test/fake_token_storage.dart     in-memory storage for the tests
 ```
 
 ## Design notes
