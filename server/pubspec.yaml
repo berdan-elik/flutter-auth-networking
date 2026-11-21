@@ -1,0 +1,14 @@
+name: auth_server
+description: In-memory auth backend for the example app.
+publish_to: 'none'
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  dart_jsonwebtoken: ^3.4.1
+  shelf: ^1.4.3
+  shelf_router: ^1.1.5
+
+dev_dependencies:
+  lints: ^6.1.0
