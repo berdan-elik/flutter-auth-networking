@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_auth_networking/api/api_client.dart';
 import 'package:flutter_auth_networking/auth/auth_providers.dart';
@@ -27,6 +29,23 @@ const unauthorized = {'error': 'unauthorized'};
 // Long enough for every request of a burst to get its 401 while the refresh
 // is still running.
 const refreshDelay = Duration(milliseconds: 50);
+
+/// A mocked reply that waits for the test. [received] completes when the
+/// request reaches the server; the reply goes out after [release].
+class HeldReply {
+  final _received = Completer<void>();
+  final _release = Completer<void>();
+
+  Future<void> get received => _received.future;
+
+  void release() => _release.complete();
+
+  Future<Object?> send(Object? body) async {
+    _received.complete();
+    await _release.future;
+    return body;
+  }
+}
 
 void main() {
   late FakeTokenStorage storage;
@@ -176,17 +195,21 @@ void main() {
   );
 
   test('a 401 that arrives after a refresh reuses the new token', () async {
+    final rejection = HeldReply();
     apiServer.onGet(
       '/me',
-      (server) => server.reply(401, unauthorized, delay: refreshDelay),
+      (server) =>
+          server.replyCallbackAsync(401, (_) => rejection.send(unauthorized)),
       headers: oldHeader,
     );
     retrySucceeds();
 
     final response = getProfile();
-    // While the request is in the air, another one finishes refreshing.
-    await Future<void>.delayed(refreshDelay ~/ 2);
+    // The request left with the old token. Before its 401 comes back,
+    // another request finishes refreshing.
+    await rejection.received;
     storage.tokens = newTokens;
+    rejection.release();
 
     expect((await response).data, profile);
     expect(refreshCalls(), 0);
