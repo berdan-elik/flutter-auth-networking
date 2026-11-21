@@ -112,8 +112,6 @@ flutter test
 - Retrying requests whose body is a stream (file uploads); the body cannot be
   sent twice.
 - The iOS build. The example app was run on an Android emulator only.
-- Built with Flutter 3.44. From 3.47 on, the analyzer reports
-  `package:flutter/material.dart` as deprecated in favour of `material_ui`.
 
 ## License
 
